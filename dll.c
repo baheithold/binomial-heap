@@ -234,6 +234,66 @@ void removeDLLall(DLL *items) {
 }
 
 /*
+ * Method:
+ * Usage:
+ * Description:
+ */
+void firstDLL(DLL *items) {
+    assert(items != 0);
+    items->iterator = items->head;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
+void lastDLL(DLL *items) {
+    assert(items != 0);
+    items->iterator = items->tail;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
+int moreDLL(DLL *items) {
+    assert(items != 0);
+    return items->iterator == NULL ? 0 : 1;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
+void nextDLL(DLL *items) {
+    assert(items != 0);
+    items->iterator = items->iterator->next;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
+void prevDLL(DLL *items) {
+    assert(items != 0);
+    items->iterator = items->iterator->prev;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
+void *currentDLL(DLL *items) {
+    assert(items != 0);
+    return getNODEvalue(items->iterator);
+}
+
+/*
  *  Method: unionDLL
  *  Usage:  unionDLL(recipient, donor);
  *  Description: The union method takes two lists and moves all the items
