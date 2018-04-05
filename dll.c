@@ -238,6 +238,20 @@ void removeDLLall(DLL *items) {
  * Usage:
  * Description:
  */
+void *removeDLLnode(DLL *items, void *node) {
+    assert(items != 0);
+    assert(node != 0);
+    void *rv = getNODEvalue(node);
+    ((NODE *)node)->prev->next = ((NODE *)node)->next;
+    free((NODE *)node);
+    return rv;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
 void firstDLL(DLL *items) {
     assert(items != 0);
     items->iterator = items->head;
