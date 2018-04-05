@@ -1,4 +1,4 @@
-OBJS = integer.o dll.o
+OBJS = integer.o dll.o vertex.o edge.o
 OOPTS = -Wall -Wextra -std=c99 -g -c
 LOPTS = -Wall -Wextra -std=c99 -g
 EXECUTABLES = test-binomial
@@ -13,6 +13,15 @@ integer.o:	integer.c integer.h
 
 dll.o:	dll.c dll.h
 		gcc $(OOPTS) dll.c
+
+vertex.o: 	vertex.c vertex.h
+		gcc $(OOPTS) vertex.c
+
+edge.o: 	edge.c edge.h
+		gcc $(OOPTS) edge.c
+
+binomial.o: 	binomial.c binomial.h
+		gcc $(OOPTS) binomial.c
 
 test-binomial.o:	test-binomial.c dll.h integer.h
 		gcc $(OOPTS) test-binomial.c
