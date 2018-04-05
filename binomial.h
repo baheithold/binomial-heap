@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-typedef struct binomial BINOMIAL;
+typedef struct BINOMIAL BINOMIAL;
 
 extern BINOMIAL *newBINOMIAL(
     void (*display)(void *, FILE *),
