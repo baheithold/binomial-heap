@@ -117,6 +117,7 @@ static NODE *getNodeAtIndex(DLL *items, int index);
 struct DLL {
     NODE *head;
     NODE *tail;
+    NODE *iterator;
     int size;
 
     // Public methods
@@ -144,6 +145,7 @@ DLL *newDLL(void (*d)(void *, FILE *), void (*f)(void *)) {
     assert(items != 0);
     items->head = NULL;
     items->tail = NULL;
+    items->iterator = NULL;
     items->size = 0;
     items->display = d;
     items->free = f;
@@ -210,6 +212,25 @@ void *removeDLL(DLL *items, int index) {
         oldValue = items->removeFromIndex(items, index);
     }
     return oldValue;
+}
+
+/*
+ * Method:
+ * Usage:
+ * Description:
+ */
+void removeDLLall(DLL *items) {
+    assert(items != 0);
+    NODE *curr = items->head;
+    NODE *tmp;
+    while (curr != NULL) {
+        tmp = curr;
+        curr = curr->next;
+        free((NODE *)tmp);
+    }
+    items->head = NULL;
+    items->tail = NULL;
+    items->size = 0;
 }
 
 /*
