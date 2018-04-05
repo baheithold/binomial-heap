@@ -12,7 +12,7 @@
 typedef struct DLL DLL;
 
 extern DLL *newDLL(void (*d)(void *, FILE *), void (*f)(void *));
-extern void insertDLL(DLL *items, int index, void *value);
+extern void *insertDLL(DLL *items, int index, void *value);
 extern void *removeDLL(DLL *items, int index);
 extern void unionDLL(DLL *recipient, DLL *donor);
 extern void *getDLL(DLL *items, int index);

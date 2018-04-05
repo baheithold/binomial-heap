@@ -99,9 +99,9 @@ void setNODEprev(NODE *n, NODE *newPrev) {
 
 
 // Private DLL method prototypes
-static void addToFront(DLL *items, void *value);
-static void addToBack(DLL *items, void *value);
-static void insertAtIndex(DLL *items,int, void *value);
+static NODE *addToFront(DLL *items, void *value);
+static NODE *addToBack(DLL *items, void *value);
+static NODE *insertAtIndex(DLL *items,int, void *value);
 static void *removeFromFront(DLL *items);
 static void *removeFromBack(DLL *items);
 static void *removeFromIndex(DLL *items, int index);
@@ -124,9 +124,9 @@ struct DLL {
     void (*free)(void *);
 
     // Private methods
-    void (*addToFront)(DLL *, void *);
-    void (*addToBack)(DLL *, void *);
-    void (*insertAtIndex)(DLL *,int, void *);
+    NODE *(*addToFront)(DLL *, void *);
+    NODE *(*addToBack)(DLL *, void *);
+    NODE *(*insertAtIndex)(DLL *,int, void *);
     void *(*removeFromFront)(DLL *);
     void *(*removeFromBack)(DLL *);
     void *(*removeFromIndex)(DLL *, int);
@@ -166,21 +166,23 @@ DLL *newDLL(void (*d)(void *, FILE *), void (*f)(void *)) {
  *  insertions at a constant distance from the front and from the back.
  *  The doubly-linked list uses zero-based indexing.
  */
-void insertDLL(DLL *items, int index, void *value) {
+void *insertDLL(DLL *items, int index, void *value) {
     assert(items != 0);
     assert(index >= 0 && index <= items->size);
+    NODE *n;
     if (index == 0) {
         // Value is to be added at the front of the list
-        items->addToFront(items, value);
+        n = items->addToFront(items, value);
     }
     else if (index == items->size) {
         // Value is to be added at the back of the list
-        items->addToBack(items, value);
+        n = items->addToBack(items, value);
     }
     else {
         // Value is to be inserted at an index between 1 and items->size - 1
-        items->insertAtIndex(items, index, value);
+        n = items->insertAtIndex(items, index, value);
     }
+    return n;
 }
 
 /*
@@ -251,7 +253,6 @@ void unionDLL(DLL *recipient, DLL *donor) {
  * front and from the back.
  */
 void *getDLL(DLL *items, int index) {
-    // TODO: Can I do better?
     assert(items != 0);
     assert(index >= 0 && index < items->size);
     if (index == 0) {
@@ -382,7 +383,7 @@ void freeDLL(DLL *items) {
  *  Usage:  addToFront(items, value);
  *  Description: This method adds a value to the head of a DLL object.
  */
-void addToFront(DLL *items, void *value) {
+NODE *addToFront(DLL *items, void *value) {
     assert(items != 0);
     NODE *n = newNODE(value, items->head, NULL);
     if (items->size == 0) {
@@ -396,6 +397,7 @@ void addToFront(DLL *items, void *value) {
         items->head = n;
     }
     items->size++;
+    return n;
 }
 
 /*
@@ -403,18 +405,20 @@ void addToFront(DLL *items, void *value) {
  *  Usage:  addToBack(items, value);
  *  Description: This method adds a value to the tail of a DLL object.
  */
-void addToBack(DLL *items, void *value) {
+NODE *addToBack(DLL *items, void *value) {
     assert(items != 0);
+    NODE *n;
     if (items->size == 0) {
         // List is empty
         items->addToFront(items, value);
     }
     else {
-        NODE *n = newNODE(value, NULL, items->tail);
+        n = newNODE(value, NULL, items->tail);
         setNODEnext(items->tail, n);
         items->tail = n;
     }
     items->size++;
+    return n;
 }
 
 /*
@@ -422,23 +426,25 @@ void addToBack(DLL *items, void *value) {
  *  Usage:  insertAtIndex(items, index, value);
  *  Description: This method inserts a value at a given index of a DLL object.
  */
-void insertAtIndex(DLL *items, int index, void *value) {
+NODE *insertAtIndex(DLL *items, int index, void *value) {
     assert(items != 0);
     assert(index >= 0 && index <= items->size);
+    NODE *n;
     if (index == 0) {
-        items->addToFront(items, value);
+        n = items->addToFront(items, value);
     }
     else if (index == items->size) {
-        items->addToBack(items, value);
+        n = items->addToBack(items, value);
     }
     else {
         // get node prev to node at index
         NODE *curr = items->getNodeAtIndex(items, index - 1);
-        NODE *n = newNODE(value, curr->next, curr);
+        n = newNODE(value, curr->next, curr);
         setNODEprev(curr->next, n);
         setNODEnext(curr, n);
         items->size++;
     }
+    return n;
 }
 
 /*
