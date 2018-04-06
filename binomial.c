@@ -145,7 +145,7 @@ void *insertBINOMIAL(BINOMIAL *b, void *v) {
     setHEAPNODEparent(n, n);
     insertDLL(b->rootlist, 0, n);
     b->size++;
-    // TODO: Consolidate rootlist
+    b->consolidate(b);
     return n;
 }
 
@@ -162,7 +162,7 @@ void unionBINOMIAL(BINOMIAL *recipient, BINOMIAL *donor) {
     donor->rootlist = newDLL(donor->display, donor->free);
     donor->size = 0;
     donor->extreme = NULL;
-    // TODO: Consolidate recipient rootlist
+    recipient->consolidate(recipient);
 }
 
 void *peekBINOMIAL(BINOMIAL *b) {
@@ -187,7 +187,7 @@ void freeBINOMIAL(BINOMIAL *b) {
 }
 
 
-/* Private Method Definitions */
+/******************** Private Method Definitions ********************/
 
 HEAPNODE *bubbleUp(BINOMIAL *b, HEAPNODE *n) {
     assert(b != 0);
@@ -250,6 +250,8 @@ void consolidate(BINOMIAL *b) {
 
 void updateConsolidationArray(BINOMIAL *b, HEAPNODE *D[], HEAPNODE *spot) {
     // TODO: Refactor?
+    assert(b != 0);
+    assert(spot != 0);
     int degree = sizeDLL(getHEAPNODEchildren(spot));
     while (D[degree] != NULL) {
         b->combine(b, spot, D[degree]);
