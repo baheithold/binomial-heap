@@ -165,6 +165,13 @@ void unionBINOMIAL(BINOMIAL *recipient, BINOMIAL *donor) {
     recipient->consolidate(recipient);
 }
 
+void deleteBINOMIAL(BINOMIAL *b, void *node) {
+    assert(b != 0);
+    decreaseKeyBINOMIAL(b, node, NULL);
+    void *rv = extractBINOMIAL(b);
+    (void)rv;
+}
+
 void decreaseKeyBINOMIAL(BINOMIAL *b, void *node, void *value) {
     // TODO: Am I correct?
     assert(b != 0);
@@ -179,6 +186,26 @@ void decreaseKeyBINOMIAL(BINOMIAL *b, void *node, void *value) {
 void *peekBINOMIAL(BINOMIAL *b) {
     assert(b != 0);
     return getHEAPNODEvalue(b->extreme);
+}
+
+void *extractBINOMIAL(BINOMIAL *b) {
+    // TODO: Am I correct?
+    assert(b != 0);
+    HEAPNODE *y = b->extreme;
+    y = removeDLLnode(b->rootlist, y);
+    DLL *yChildren = getHEAPNODEchildren(y);
+    firstDLL(yChildren);
+    while (currentDLL(yChildren) != NULL) {
+        setHEAPNODEparent(currentDLL(yChildren), currentDLL(yChildren));
+        nextDLL(yChildren);
+    }
+    unionDLL(b->rootlist, yChildren);
+    b->consolidate(b);
+    b->size--;
+    void *rv = getHEAPNODEvalue(y);
+    freeDLL(yChildren);
+    free((HEAPNODE *)y);
+    return rv;
 }
 
 void statisticsBINOMIAL(BINOMIAL *b, FILE *fp) {
