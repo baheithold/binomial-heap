@@ -88,6 +88,17 @@ int sizeBINOMIAL(BINOMIAL *b) {
     return b->size;
 }
 
+void unionBINOMIAL(BINOMIAL *recipient, BINOMIAL *donor) {
+    assert(recipient != 0);
+    assert(donor != 0);
+    unionDLL(recipient->rootlist, donor->rootlist);
+    recipient->size += donor->size;
+    donor->rootlist = newDLL(donor->display, donor->free);
+    donor->size = 0;
+    donor->extreme = NULL;
+    // TODO: Consolidate recipient rootlist
+}
+
 void *peekBINOMIAL(BINOMIAL *b) {
     assert(b != 0);
     return getHEAPNODEvalue(b->extreme);
