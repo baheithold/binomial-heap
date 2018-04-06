@@ -1,6 +1,6 @@
-OBJS = integer.o dll.o vertex.o edge.o
+OBJS = integer.o dll.o vertex.o edge.o binomial.o
 OOPTS = -Wall -Wextra -std=c99 -g -c
-LOPTS = -Wall -Wextra -std=c99 -g
+LOPTS = -Wall -Wextra -std=c99 -g -lm
 EXECUTABLES = test-binomial
 
 all:	$(EXECUTABLES)

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 typedef struct HEAPNODE HEAPNODE;
 
@@ -31,6 +32,7 @@ HEAPNODE *newHEAPNODE(void *v, void (*d)(void *, FILE *), void (*f)(void *)) {
     n->owner = NULL;
     n->display = d;
     n->free = f;
+    return n;
 }
 
 int getHEAPNODEkey(HEAPNODE *n) {
@@ -60,7 +62,7 @@ HEAPNODE *getHEAPNODEparent(HEAPNODE *n) {
 
 void setHEAPNODEparent(HEAPNODE *n, HEAPNODE *p) {
     assert(n != 0);
-    n->parent = n;
+    n->parent = p;
 }
 
 DLL *getHEAPNODEchildren(HEAPNODE *n) {
@@ -83,9 +85,6 @@ void setHEAPNODEowner(HEAPNODE *n, DLL *owner) {
     n->owner = owner;
 }
 
-void displayHEAPNODE(void *v, FILE *fp) {
-}
-
 int isRoot(HEAPNODE *n) {
     assert(n != 0);
     return getHEAPNODEparent(n) == n ? 1 : 0;
@@ -99,8 +98,10 @@ void swap(HEAPNODE *x, HEAPNODE *y) {
 
 
 /* BINOMIAL private method prototypes */
-HEAPNODE *bubbleUp(BINOMIAL *b, HEAPNODE *n);
-HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y);
+static HEAPNODE *bubbleUp(BINOMIAL *b, HEAPNODE *n);
+static HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y);
+static void consolidate(BINOMIAL *b);
+static void updateConsolidationArray(BINOMIAL *, HEAPNODE *[], HEAPNODE *);
 
 
 struct BINOMIAL {
@@ -113,6 +114,8 @@ struct BINOMIAL {
     void (*free)(void *);
     HEAPNODE *(*bubbleUp)(BINOMIAL *, HEAPNODE *);
     HEAPNODE *(*combine)(BINOMIAL *, HEAPNODE *, HEAPNODE *);
+    void (*consolidate)(BINOMIAL *);
+    void (*updateConsolidationArray)(BINOMIAL *, HEAPNODE *[], HEAPNODE *);
 };
 
 BINOMIAL *newBINOMIAL(
@@ -131,6 +134,8 @@ BINOMIAL *newBINOMIAL(
     rv->free = free;
     rv->bubbleUp = bubbleUp;
     rv->combine = combine;
+    rv->consolidate = consolidate;
+    rv->updateConsolidationArray = updateConsolidationArray;
     return rv;
 }
 
@@ -206,7 +211,6 @@ HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y) {
     assert(b != 0);
     assert(x != 0);
     assert(y != 0);
-    // TODO: Am I correct?
     if (b->compare(getHEAPNODEvalue(x), getHEAPNODEvalue(y)) < 0) {
         insertDLL(getHEAPNODEchildren(x), 0, y);
         setHEAPNODEparent(y, x);
@@ -217,4 +221,29 @@ HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y) {
         setHEAPNODEparent(x, y);
         return y;
     }
+}
+
+void consolidate(BINOMIAL *b) {
+    assert(b != 0);
+    int size = (log10(b->size) / log10(2)) + 1;
+    HEAPNODE *D[size];
+    for (int i = 0; i < size; ++i) {
+        D[i] = NULL;
+    }
+    while (sizeDLL(b->rootlist) > 0) {
+        HEAPNODE *spot = getDLL(b->rootlist, 0);
+        // TODO: Remove spot from the rootlist
+        b->updateConsolidationArray(b, D, spot);
+    }
+}
+
+void updateConsolidationArray(BINOMIAL *b, HEAPNODE *D[], HEAPNODE *spot) {
+    // TODO: Refactor?
+    int degree = sizeDLL(getHEAPNODEchildren(spot));
+    while (D[degree] != NULL) {
+        b->combine(b, spot, D[degree]);
+        D[degree] = NULL;
+        degree++;
+    }
+    D[degree] = spot;
 }
