@@ -91,8 +91,15 @@ int isRoot(HEAPNODE *n) {
     return getHEAPNODEparent(n) == n ? 1 : 0;
 }
 
+void swap(HEAPNODE *x, HEAPNODE *y) {
+    void *tmp = getHEAPNODEvalue(x);
+    setHEAPNODEvalue(x, getHEAPNODEvalue(y));
+    setHEAPNODEvalue(y, tmp);
+}
+
 
 /* BINOMIAL private method prototypes */
+HEAPNODE *bubbleUp(BINOMIAL *b, HEAPNODE *n);
 HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y);
 
 
@@ -104,6 +111,7 @@ struct BINOMIAL {
     int (*compare)(void *, void *);
     void (*update)(void *, void *);
     void (*free)(void *);
+    HEAPNODE *(*bubbleUp)(BINOMIAL *, HEAPNODE *);
     HEAPNODE *(*combine)(BINOMIAL *, HEAPNODE *, HEAPNODE *);
 };
 
@@ -121,6 +129,8 @@ BINOMIAL *newBINOMIAL(
     rv->compare = compare;
     rv->update = update;
     rv->free = free;
+    rv->bubbleUp = bubbleUp;
+    rv->combine = combine;
     return rv;
 }
 
@@ -174,10 +184,29 @@ void freeBINOMIAL(BINOMIAL *b) {
 
 /* Private Method Definitions */
 
+HEAPNODE *bubbleUp(BINOMIAL *b, HEAPNODE *n) {
+    assert(b != 0);
+    assert(n != 0);
+    // TODO: Am I correct?
+    // TODO: Refactor?
+    HEAPNODE *p = getHEAPNODEparent(n);
+    if (n == p) return n;
+    if (b->compare(getHEAPNODEvalue(n), getHEAPNODEvalue(getHEAPNODEparent(n))) >= 0) {
+        return n;
+    }
+    if (b->update) b->update(getHEAPNODEvalue(n), p);
+    if (b->update) b->update(getHEAPNODEvalue(p), n);
+    void *tmp = getHEAPNODEvalue(n);
+    setHEAPNODEvalue(n, getHEAPNODEvalue(p));
+    setHEAPNODEvalue(p, tmp);
+    return bubbleUp(b, p);
+}
+
 HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y) {
     assert(b != 0);
     assert(x != 0);
     assert(y != 0);
+    // TODO: Am I correct?
     if (b->compare(getHEAPNODEvalue(x), getHEAPNODEvalue(y)) < 0) {
         insertDLL(getHEAPNODEchildren(x), 0, y);
         setHEAPNODEparent(y, x);
