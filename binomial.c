@@ -9,18 +9,22 @@
 #include <stdlib.h>
 #include <assert.h>
 
-typedef struct heapnode {
+typedef struct HEAPNODE HEAPNODE;
+
+struct HEAPNODE {
     int key;
     void *value;
+    HEAPNODE *parent;
     DLL *children;
     void (*display)(void *, FILE *);
     void (*free)(void *);
-} HEAPNODE;
+};
 
 HEAPNODE *newHEAPNODE(void *v, void (*d)(void *, FILE *), void (*f)(void *)) {
     HEAPNODE *n = malloc(sizeof(HEAPNODE));
     n->key = 0;
     n->value = v;
+    n->parent = NULL;
     n->children = newDLL(d, f);
     n->display = d;
     n->free = f;
@@ -44,6 +48,16 @@ void *getHEAPNODEvalue(HEAPNODE *n) {
 void setHEAPNODEvalue(HEAPNODE *n, void *v) {
     assert(n != 0);
     n->value = v;
+}
+
+HEAPNODE *getHEAPNODEparent(HEAPNODE *n) {
+    assert(n != 0);
+    return n->parent;
+}
+
+void setHEAPNODEparent(HEAPNODE *n, HEAPNODE *p) {
+    assert(n != 0);
+    n->parent = n;
 }
 
 DLL *getHEAPNODEchildren(HEAPNODE *n) {
@@ -81,6 +95,16 @@ BINOMIAL *newBINOMIAL(
     rv->update = update;
     rv->free = free;
     return rv;
+}
+
+void *insertBINOMIAL(BINOMIAL *b, void *v) {
+    assert(b != 0);
+    HEAPNODE *n = newHEAPNODE(v, b->display, b->free);
+    setHEAPNODEparent(n, n);
+    insertDLL(b->rootlist, 0, n);
+    b->size++;
+    // TODO: Consolidate rootlist
+    return n;
 }
 
 int sizeBINOMIAL(BINOMIAL *b) {
