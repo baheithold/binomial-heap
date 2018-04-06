@@ -49,6 +49,7 @@ void freeVERTEX(void *w) {
     VERTEX *v = w;
     freeDLL(v->neighbors);
     freeDLL(v->weights);
+    freeDLL(v->successors);
     free(v);
 }
 
