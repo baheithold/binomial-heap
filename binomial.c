@@ -6,6 +6,7 @@
 
 #include "binomial.h"
 #include "dll.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -16,6 +17,7 @@ struct HEAPNODE {
     void *value;
     HEAPNODE *parent;
     DLL *children;
+    DLL *owner;
     void (*display)(void *, FILE *);
     void (*free)(void *);
 };
@@ -26,6 +28,7 @@ HEAPNODE *newHEAPNODE(void *v, void (*d)(void *, FILE *), void (*f)(void *)) {
     n->value = v;
     n->parent = NULL;
     n->children = newDLL(d, f);
+    n->owner = NULL;
     n->display = d;
     n->free = f;
 }
@@ -70,6 +73,29 @@ void setHEAPNODEchildren(HEAPNODE *n, DLL *children) {
     n->children = children;
 }
 
+DLL *getHEAPNODEowner(HEAPNODE *n) {
+    assert(n != 0);
+    return n->owner;
+}
+
+void setHEAPNODEowner(HEAPNODE *n, DLL *owner) {
+    assert(n != 0);
+    n->owner = owner;
+}
+
+void displayHEAPNODE(void *v, FILE *fp) {
+}
+
+int isRoot(HEAPNODE *n) {
+    assert(n != 0);
+    return getHEAPNODEparent(n) == n ? 1 : 0;
+}
+
+
+/* BINOMIAL private method prototypes */
+HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y);
+
+
 struct BINOMIAL {
     DLL *rootlist;
     HEAPNODE *extreme;
@@ -78,6 +104,7 @@ struct BINOMIAL {
     int (*compare)(void *, void *);
     void (*update)(void *, void *);
     void (*free)(void *);
+    HEAPNODE *(*combine)(BINOMIAL *, HEAPNODE *, HEAPNODE *);
 };
 
 BINOMIAL *newBINOMIAL(
@@ -142,4 +169,23 @@ void freeBINOMIAL(BINOMIAL *b) {
     assert(b != 0);
     freeDLL(b->rootlist);
     free(b);
+}
+
+
+/* Private Method Definitions */
+
+HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y) {
+    assert(b != 0);
+    assert(x != 0);
+    assert(y != 0);
+    if (b->compare(getHEAPNODEvalue(x), getHEAPNODEvalue(y)) < 0) {
+        insertDLL(getHEAPNODEchildren(x), 0, y);
+        setHEAPNODEparent(y, x);
+        return x;
+    }
+    else {
+        insertDLL(getHEAPNODEchildren(y), 0, x);
+        setHEAPNODEparent(x, y);
+        return y;
+    }
 }
