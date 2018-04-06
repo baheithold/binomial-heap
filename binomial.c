@@ -102,3 +102,9 @@ void statisticsBINOMIAL(BINOMIAL *b, FILE *fp) {
         fprintf(fp, "\n");
     }
 }
+
+void freeBINOMIAL(BINOMIAL *b) {
+    assert(b != 0);
+    freeDLL(b->rootlist);
+    free(b);
+}
