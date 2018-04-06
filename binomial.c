@@ -224,6 +224,7 @@ HEAPNODE *combine(BINOMIAL *b, HEAPNODE *x, HEAPNODE *y) {
 }
 
 void consolidate(BINOMIAL *b) {
+    // TODO: Am I correct?
     assert(b != 0);
     int size = (log10(b->size) / log10(2)) + 1;
     HEAPNODE *D[size];
@@ -232,8 +233,18 @@ void consolidate(BINOMIAL *b) {
     }
     while (sizeDLL(b->rootlist) > 0) {
         HEAPNODE *spot = getDLL(b->rootlist, 0);
-        // TODO: Remove spot from the rootlist
+        void *trash = removeDLLnode(b->rootlist, spot);
+        (void)trash; // Shut the compiler up
         b->updateConsolidationArray(b, D, spot);
+    }
+    b->extreme = NULL;
+    for (int i = 0; i < size; ++i) {
+        if (D[i] != NULL) {
+            insertDLL(b->rootlist, 0, D[i]);
+            if (b->extreme == NULL || b->compare(D[i], b->extreme) < 0) {
+                b->extreme = D[i];
+            }
+        }
     }
 }
 
