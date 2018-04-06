@@ -165,6 +165,17 @@ void unionBINOMIAL(BINOMIAL *recipient, BINOMIAL *donor) {
     recipient->consolidate(recipient);
 }
 
+void decreaseKeyBINOMIAL(BINOMIAL *b, void *node, void *value) {
+    // TODO: Am I correct?
+    assert(b != 0);
+    assert(node != 0);
+    setHEAPNODEvalue(node, value);
+    HEAPNODE *rv = b->bubbleUp(b, node);
+    if (b->compare(getHEAPNODEvalue(rv), b->extreme) < 0) {
+        b->extreme = rv;
+    }
+}
+
 void *peekBINOMIAL(BINOMIAL *b) {
     assert(b != 0);
     return getHEAPNODEvalue(b->extreme);
