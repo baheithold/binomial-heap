@@ -243,7 +243,6 @@ void *removeDLLnode(DLL *items, void *node) {
     assert(node != 0);
     void *rv = getNODEvalue(node);
     ((NODE *)node)->prev->next = ((NODE *)node)->next;
-    free((NODE *)node);
     return rv;
 }
 

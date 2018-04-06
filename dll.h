@@ -15,6 +15,7 @@ extern DLL *newDLL(void (*d)(void *, FILE *), void (*f)(void *));
 extern void *insertDLL(DLL *items, int index, void *value);
 extern void *removeDLL(DLL *items, int index);
 extern void removeDLLall(DLL *);
+extern void *removeDLLnode(DLL *, void *);
 extern void firstDLL(DLL *);
 extern void lastDLL(DLL *);
 extern int moreDLL(DLL *);
