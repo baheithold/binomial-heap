@@ -26,8 +26,39 @@ HEAPNODE *newHEAPNODE(void *v, void (*d)(void *, FILE *), void (*f)(void *)) {
     n->free = f;
 }
 
+int getHEAPNODEkey(HEAPNODE *n) {
+    assert(n != 0);
+    return n->key;
+}
+
+void setHEAPNODEkey(HEAPNODE *n, int key) {
+    assert(n != 0);
+    n->key = key;
+}
+
+void *getHEAPNODEvalue(HEAPNODE *n) {
+    assert(n != 0);
+    return n->value;
+}
+
+void setHEAPNODEvalue(HEAPNODE *n, void *v) {
+    assert(n != 0);
+    n->value = v;
+}
+
+DLL *getHEAPNODEchildren(HEAPNODE *n) {
+    assert(n != 0);
+    return n->children;
+}
+
+void setHEAPNODEchildren(HEAPNODE *n, DLL *children) {
+    assert(n != 0);
+    n->children = children;
+}
+
 struct BINOMIAL {
-    DLL *rootList;
+    DLL *rootlist;
+    HEAPNODE *extreme;
     int size;
     void (*display)(void *, FILE *);
     int (*compare)(void *, void *);
@@ -42,11 +73,32 @@ BINOMIAL *newBINOMIAL(
         void (*free)(void *)) {
     BINOMIAL *rv = malloc(sizeof(BINOMIAL));
     assert(rv != 0);
-    rv->rootList = newDLL(display, free);
+    rv->rootlist = newDLL(display, free);
+    rv->extreme = NULL;
     rv->size = 0;
     rv->display = display;
     rv->compare = compare;
     rv->update = update;
     rv->free = free;
     return rv;
+}
+
+int sizeBINOMIAL(BINOMIAL *b) {
+    assert(b != 0);
+    return b->size;
+}
+
+void *peekBINOMIAL(BINOMIAL *b) {
+    assert(b != 0);
+    return getHEAPNODEvalue(b->extreme);
+}
+
+void statisticsBINOMIAL(BINOMIAL *b, FILE *fp) {
+    assert(b != 0);
+    fprintf(fp, "size: %d\nrootlist size: %d\n", b->size, sizeDLL(b->rootlist));
+    if (b->size > 0) {
+        fprintf(fp, "extreme: ");
+        b->display(b->extreme, fp);
+        fprintf(fp, "\n");
+    }
 }
