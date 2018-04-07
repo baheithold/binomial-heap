@@ -1,0 +1,18 @@
+MIN HEAP
+rootlist: a2 a0*
+debug:
+{{a2,a0}}
+{{a3}}
+min should be a0
+min is a0
+rootlist: NULL a2*
+debug:
+{{a2}}
+{{a3}}
+min should be a2
+min is a2
+rootlist: a3*
+debug:
+{{a3}}
+peek: a3
+size: 1

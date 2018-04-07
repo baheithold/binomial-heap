@@ -1,0 +1,18 @@
+MIN HEAP
+rootlist: 0.000000* 2.000000
+debug:
+{{0.000000,2.000000}}
+{{3.000000}}
+min should be 0.000000
+min is 0.000000
+rootlist: NULL 2.000000*
+debug:
+{{2.000000}}
+{{3.000000}}
+min should be 2.000000
+min is 2.000000
+rootlist: 3.000000*
+debug:
+{{3.000000}}
+peek: 3.000000
+size: 1

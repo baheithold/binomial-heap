@@ -23,8 +23,8 @@ edge.o: 	edge.c edge.h
 binomial.o: 	binomial.c binomial.h
 		gcc $(OOPTS) binomial.c
 
-test-binomial.o:	test-binomial.c dll.h integer.h
-		gcc $(OOPTS) test-binomial.c
+test-binomial.o:	./Testing/test-binomial.c dll.h integer.h
+		gcc $(OOPTS) ./Testing/test-binomial.c
 
 test:	$(EXECUTABLES)
 		@echo Testing test-binomial...
