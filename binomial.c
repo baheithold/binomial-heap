@@ -20,17 +20,24 @@ struct BHNODE {
     DLL *children;
     DLL *owner;
     void (*display)(void *, FILE *);
+    int (*compare)(void *, void *);
     void (*free)(void *);
 };
 
-BHNODE *newBHNODE(void *v, void (*d)(void *, FILE *), void (*f)(void *)) {
+BHNODE *newBHNODE(
+        void *v,
+        void (*d)(void *, FILE *),
+        int (*c)(void *, void *),
+        void (*f)(void *)) {
     BHNODE *n = malloc(sizeof(BHNODE));
+    assert(n != 0);
     n->key = 0;
     n->value = v;
     n->parent = NULL;
     n->children = newDLL(d, f);
     n->owner = NULL;
     n->display = d;
+    n->compare = c;
     n->free = f;
     return n;
 }
@@ -85,6 +92,29 @@ void setBHNODEowner(BHNODE *n, DLL *owner) {
     n->owner = owner;
 }
 
+void displayBHNODE(void *n, FILE *fp) {
+    BHNODE *x = n;
+    x->display(x->value, fp);
+}
+
+int compareBHNODE(void *a, void *b) {
+    assert(a != 0);
+    assert(b != 0);
+    void *av = getBHNODEvalue(a);
+    void *bv = getBHNODEvalue(b);
+    return ((BHNODE *) a)->compare(av, bv);
+}
+
+void freeBHNODE(void *n) {
+    assert(n != 0);
+    BHNODE *x = n;
+    freeDLL(getBHNODEchildren(x));
+    if (x->free) {
+        x->free(getBHNODEvalue(x));
+    }
+    free(x);
+}
+
 int isRoot(BHNODE *n) {
     assert(n != 0);
     return getBHNODEparent(n) == n ? 1 : 0;
@@ -125,7 +155,7 @@ BINOMIAL *newBINOMIAL(
         void (*free)(void *)) {
     BINOMIAL *rv = malloc(sizeof(BINOMIAL));
     assert(rv != 0);
-    rv->rootlist = newDLL(display, free);
+    rv->rootlist = newDLL(displayBHNODE, freeBHNODE);
     rv->extreme = NULL;
     rv->size = 0;
     rv->display = display;
@@ -141,9 +171,9 @@ BINOMIAL *newBINOMIAL(
 
 void *insertBINOMIAL(BINOMIAL *b, void *v) {
     assert(b != 0);
-    BHNODE *n = newBHNODE(v, b->display, b->free);
+    BHNODE *n = newBHNODE(v, b->display, b->compare, b->free);
     setBHNODEparent(n, n);
-    insertDLL(b->rootlist, 0, n);
+    insertDLL(b->rootlist, sizeDLL(b->rootlist), n);
     b->size++;
     b->consolidate(b);
     return n;
@@ -178,7 +208,7 @@ void decreaseKeyBINOMIAL(BINOMIAL *b, void *node, void *value) {
     assert(node != 0);
     setBHNODEvalue(node, value);
     BHNODE *rv = b->bubbleUp(b, node);
-    if (b->compare(getBHNODEvalue(rv), b->extreme) < 0) {
+    if (b->compare(getBHNODEvalue(rv), b->extreme) > 0) {
         b->extreme = rv;
     }
 }
@@ -220,27 +250,40 @@ void statisticsBINOMIAL(BINOMIAL *b, FILE *fp) {
 
 void displayBINOMIAL(BINOMIAL *b, FILE *fp) {
     assert(b != 0);
-    int degree = 0;
     fprintf(fp, "rootlist: ");
+    int degree = 0;
+    int spotDegree;
     firstDLL(b->rootlist);
-    DLL *currChildren;
-    int currChildrenDegree = 0;
-    while (currentDLL(b->rootlist) != NULL) {
-        currChildren = getBHNODEchildren(currentDLL(b->rootlist));
-        currChildrenDegree = (log10(sizeDLL(currChildren)) / log10(2)) + 1;
-        if (degree < currChildrenDegree) {
+    while (moreDLL(b->rootlist)) {
+        DLL *spotChildren = getBHNODEchildren(currentDLL(b->rootlist));
+        spotDegree = sizeDLL(spotChildren);
+        if (degree < spotDegree) {
             fprintf(fp, "NULL");
-            degree++;
         }
         else {
+            displayBHNODE(currentDLL(b->rootlist), fp);
+            if (currentDLL(b->rootlist) == b->extreme) fprintf(fp, "*");
+            nextDLL(b->rootlist);
         }
+        if (moreDLL(b->rootlist)) fprintf(fp, " ");
         degree++;
+    }
+}
+
+void displayBINOMIALdebug(BINOMIAL *b, FILE *fp) {
+    assert(b != 0);
+    displayDLL(b->rootlist, fp);
+    firstDLL(b->rootlist);
+    while (moreDLL(b->rootlist)) {
+        fprintf(fp, "\n");
+        displayDLL(getBHNODEchildren(currentDLL(b->rootlist)), fp);
         nextDLL(b->rootlist);
     }
 }
 
 void freeBINOMIAL(BINOMIAL *b) {
     assert(b != 0);
+    firstDLL(b->rootlist);
     freeDLL(b->rootlist);
     free(b);
 }
@@ -255,7 +298,7 @@ BHNODE *bubbleUp(BINOMIAL *b, BHNODE *n) {
     // TODO: Refactor?
     BHNODE *p = getBHNODEparent(n);
     if (n == p) return n;
-    if (b->compare(getBHNODEvalue(n), getBHNODEvalue(getBHNODEparent(n))) >= 0) {
+    if (compareBHNODE(n, getBHNODEparent(n)) >= 0) {
         return n;
     }
     if (b->update) b->update(getBHNODEvalue(n), p);
@@ -270,13 +313,15 @@ BHNODE *combine(BINOMIAL *b, BHNODE *x, BHNODE *y) {
     assert(b != 0);
     assert(x != 0);
     assert(y != 0);
-    if (b->compare(getBHNODEvalue(x), getBHNODEvalue(y)) < 0) {
-        insertDLL(getBHNODEchildren(x), 0, y);
+    if (compareBHNODE(x, y) < 0) {
+        DLL *xChildren = getBHNODEchildren(x);
+        insertDLL(xChildren, sizeDLL(xChildren), y);
         setBHNODEparent(y, x);
         return x;
     }
     else {
-        insertDLL(getBHNODEchildren(y), 0, x);
+        DLL *yChildren = getBHNODEchildren(y);
+        insertDLL(yChildren, sizeDLL(yChildren), x);
         setBHNODEparent(x, y);
         return y;
     }
@@ -291,16 +336,14 @@ void consolidate(BINOMIAL *b) {
         D[i] = NULL;
     }
     while (sizeDLL(b->rootlist) > 0) {
-        BHNODE *spot = getDLL(b->rootlist, 0);
-        void *trash = removeDLLnode(b->rootlist, spot);
-        (void)trash; // Shut the compiler up
+        BHNODE *spot = removeDLL(b->rootlist, 0);
         b->updateConsolidationArray(b, D, spot);
     }
     b->extreme = NULL;
     for (int i = 0; i < size; ++i) {
         if (D[i] != NULL) {
-            insertDLL(b->rootlist, 0, D[i]);
-            if (b->extreme == NULL || b->compare(D[i], b->extreme) < 0) {
+            insertDLL(b->rootlist, sizeDLL(b->rootlist), D[i]);
+            if (b->extreme == NULL || compareBHNODE(D[i], b->extreme) < 0) {
                 b->extreme = D[i];
             }
         }
@@ -308,12 +351,13 @@ void consolidate(BINOMIAL *b) {
 }
 
 void updateConsolidationArray(BINOMIAL *b, BHNODE *D[], BHNODE *spot) {
-    // TODO: Refactor?
+    // TODO: Am I correct?
     assert(b != 0);
+    assert(D != 0);
     assert(spot != 0);
     int degree = sizeDLL(getBHNODEchildren(spot));
     while (D[degree] != NULL) {
-        b->combine(b, spot, D[degree]);
+        spot = b->combine(b, spot, D[degree]);
         D[degree] = NULL;
         degree++;
     }

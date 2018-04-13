@@ -7,9 +7,11 @@ int main(void) {
     BINOMIAL *b = newBINOMIAL(displayINTEGER, compareINTEGER, 0, freeINTEGER);
 
     for (int i = 0; i <= 12; i++) {
-        printf("INSERTING: %d\n", i);
         insertBINOMIAL(b, newINTEGER(i));
     }
+    displayBINOMIAL(b, stdout);
+    printf("\n");
 
+    freeBINOMIAL(b);
     return 0;
 }
