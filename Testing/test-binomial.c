@@ -9,7 +9,7 @@ int main(void) {
     for (int i = 0; i <= 12; i++) {
         insertBINOMIAL(b, newINTEGER(i));
     }
-    displayBINOMIAL(b, stdout);
+    displayBINOMIALdebug(b, stdout);
     printf("\n");
 
     freeBINOMIAL(b);

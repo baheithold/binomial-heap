@@ -6,6 +6,7 @@
 
 #include "binomial.h"
 #include "dll.h"
+#include "queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -24,6 +25,9 @@ struct BHNODE {
     void (*free)(void *);
 };
 
+static void displayBHNODE(void *, FILE *);
+static void freeBHNODE(void *);
+
 BHNODE *newBHNODE(
         void *v,
         void (*d)(void *, FILE *),
@@ -34,7 +38,7 @@ BHNODE *newBHNODE(
     n->key = 0;
     n->value = v;
     n->parent = NULL;
-    n->children = newDLL(d, f);
+    n->children = newDLL(displayBHNODE, freeBHNODE);
     n->owner = NULL;
     n->display = d;
     n->compare = c;
@@ -272,10 +276,8 @@ void displayBINOMIAL(BINOMIAL *b, FILE *fp) {
 
 void displayBINOMIALdebug(BINOMIAL *b, FILE *fp) {
     assert(b != 0);
-    displayDLL(b->rootlist, fp);
     firstDLL(b->rootlist);
     while (moreDLL(b->rootlist)) {
-        fprintf(fp, "\n");
         displayDLL(getBHNODEchildren(currentDLL(b->rootlist)), fp);
         nextDLL(b->rootlist);
     }
@@ -283,7 +285,6 @@ void displayBINOMIALdebug(BINOMIAL *b, FILE *fp) {
 
 void freeBINOMIAL(BINOMIAL *b) {
     assert(b != 0);
-    firstDLL(b->rootlist);
     freeDLL(b->rootlist);
     free(b);
 }
