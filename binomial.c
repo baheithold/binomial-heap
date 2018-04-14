@@ -15,11 +15,9 @@
 typedef struct BHNODE BHNODE;
 
 struct BHNODE {
-    int key;
     void *value;
     BHNODE *parent;
     DLL *children;
-    DLL *owner;
     void (*display)(void *, FILE *);
     int (*compare)(void *, void *);
     void (*free)(void *);
@@ -35,25 +33,13 @@ BHNODE *newBHNODE(
         void (*f)(void *)) {
     BHNODE *n = malloc(sizeof(BHNODE));
     assert(n != 0);
-    n->key = 0;
     n->value = v;
     n->parent = NULL;
     n->children = newDLL(displayBHNODE, freeBHNODE);
-    n->owner = NULL;
     n->display = d;
     n->compare = c;
     n->free = f;
     return n;
-}
-
-int getBHNODEkey(BHNODE *n) {
-    assert(n != 0);
-    return n->key;
-}
-
-void setBHNODEkey(BHNODE *n, int key) {
-    assert(n != 0);
-    n->key = key;
 }
 
 void *getBHNODEvalue(BHNODE *n) {
@@ -84,16 +70,6 @@ DLL *getBHNODEchildren(BHNODE *n) {
 void setBHNODEchildren(BHNODE *n, DLL *children) {
     assert(n != 0);
     n->children = children;
-}
-
-DLL *getBHNODEowner(BHNODE *n) {
-    assert(n != 0);
-    return n->owner;
-}
-
-void setBHNODEowner(BHNODE *n, DLL *owner) {
-    assert(n != 0);
-    n->owner = owner;
 }
 
 void displayBHNODE(void *n, FILE *fp) {
@@ -276,11 +252,30 @@ void displayBINOMIAL(BINOMIAL *b, FILE *fp) {
 
 void displayBINOMIALdebug(BINOMIAL *b, FILE *fp) {
     assert(b != 0);
-    firstDLL(b->rootlist);
-    while (moreDLL(b->rootlist)) {
-        displayDLL(getBHNODEchildren(currentDLL(b->rootlist)), fp);
-        nextDLL(b->rootlist);
+    DLL *currentList;
+    QUEUE *childrenQueue = newQUEUE(0, 0);
+    enqueue(childrenQueue, b->rootlist);
+    int numLevel = 1;
+    int numNextLevel = 0;
+    while (sizeQUEUE(childrenQueue) > 0) {
+        for (int i = 0; i < numLevel; ++i) {
+            currentList = dequeue(childrenQueue);
+            firstDLL(currentList);
+            while (moreDLL(currentList)) {
+                DLL *currChildren = getBHNODEchildren(currentDLL(currentList));
+                enqueue(childrenQueue, currChildren);
+                numNextLevel++;
+                nextDLL(currentList);
+            }
+            if (sizeDLL(currentList) > 0) {
+                displayDLL(currentList, fp);
+            }
+        }
+        if (numNextLevel != 0) fprintf(fp, "\n");
+        numLevel = numNextLevel;
+        numNextLevel = 0;
     }
+    freeQUEUE(childrenQueue);
 }
 
 void freeBINOMIAL(BINOMIAL *b) {
@@ -329,7 +324,6 @@ BHNODE *combine(BINOMIAL *b, BHNODE *x, BHNODE *y) {
 }
 
 void consolidate(BINOMIAL *b) {
-    // TODO: Am I correct?
     assert(b != 0);
     int size = (log(b->size) / log(2)) + 1;
     BHNODE *D[size];
@@ -352,7 +346,6 @@ void consolidate(BINOMIAL *b) {
 }
 
 void updateConsolidationArray(BINOMIAL *b, BHNODE *D[], BHNODE *spot) {
-    // TODO: Am I correct?
     assert(b != 0);
     assert(D != 0);
     assert(spot != 0);

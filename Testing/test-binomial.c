@@ -10,7 +10,6 @@ int main(void) {
         insertBINOMIAL(b, newINTEGER(i));
     }
     displayBINOMIALdebug(b, stdout);
-    printf("\n");
 
     freeBINOMIAL(b);
     return 0;
