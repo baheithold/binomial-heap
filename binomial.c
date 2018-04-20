@@ -18,6 +18,7 @@ struct BHNODE {
     void *value;
     BHNODE *parent;
     DLL *children;
+    void *owner;
     void (*display)(void *, FILE *);
     int (*compare)(void *, void *);
     void (*free)(void *);
@@ -72,16 +73,28 @@ void setBHNODEchildren(BHNODE *n, DLL *children) {
     n->children = children;
 }
 
+void *getBHNODEowner(BHNODE *n) {
+    assert(n != 0);
+    return n->owner;
+}
+
+void setBHNODEowner(BHNODE *n, void *owner) {
+    assert(n != 0);
+    n->owner = owner;
+}
+
 void displayBHNODE(void *n, FILE *fp) {
     BHNODE *x = n;
     x->display(x->value, fp);
 }
 
 int compareBHNODE(void *a, void *b) {
-    assert(a != 0);
-    assert(b != 0);
+    if (a == NULL) return -1;
+    else if (b == NULL) return 1;
     void *av = getBHNODEvalue(a);
     void *bv = getBHNODEvalue(b);
+    if (av == NULL) return -1;
+    else if (bv == NULL) return 1;
     return ((BHNODE *) a)->compare(av, bv);
 }
 
@@ -153,7 +166,7 @@ void *insertBINOMIAL(BINOMIAL *b, void *v) {
     assert(b != 0);
     BHNODE *n = newBHNODE(v, b->display, b->compare, b->free);
     setBHNODEparent(n, n);
-    insertDLL(b->rootlist, sizeDLL(b->rootlist), n);
+    setBHNODEowner(n, insertDLL(b->rootlist, sizeDLL(b->rootlist), n));
     b->size++;
     b->consolidate(b);
     return n;
@@ -176,6 +189,7 @@ void unionBINOMIAL(BINOMIAL *recipient, BINOMIAL *donor) {
 }
 
 void deleteBINOMIAL(BINOMIAL *b, void *node) {
+    // TODO: Free?
     assert(b != 0);
     decreaseKeyBINOMIAL(b, node, NULL);
     void *rv = extractBINOMIAL(b);
@@ -183,12 +197,11 @@ void deleteBINOMIAL(BINOMIAL *b, void *node) {
 }
 
 void decreaseKeyBINOMIAL(BINOMIAL *b, void *node, void *value) {
-    // TODO: Am I correct?
     assert(b != 0);
     assert(node != 0);
     setBHNODEvalue(node, value);
     BHNODE *rv = b->bubbleUp(b, node);
-    if (b->compare(getBHNODEvalue(rv), b->extreme) > 0) {
+    if (compareBHNODE(rv, b->extreme) < 0) {
         b->extreme = rv;
     }
 }
@@ -202,19 +215,17 @@ void *extractBINOMIAL(BINOMIAL *b) {
     // TODO: Am I correct?
     assert(b != 0);
     BHNODE *y = b->extreme;
-    y = removeDLLnode(b->rootlist, y);
+    y = removeDLLnode(b->rootlist, getBHNODEowner(y));
+    void *rv = getBHNODEvalue(y);
     DLL *yChildren = getBHNODEchildren(y);
     firstDLL(yChildren);
-    while (currentDLL(yChildren) != NULL) {
+    while (moreDLL(yChildren)) {
         setBHNODEparent(currentDLL(yChildren), currentDLL(yChildren));
         nextDLL(yChildren);
     }
     unionDLL(b->rootlist, yChildren);
     b->consolidate(b);
     b->size--;
-    void *rv = getBHNODEvalue(y);
-    freeDLL(yChildren);
-    free((BHNODE *)y);
     return rv;
 }
 
@@ -290,8 +301,6 @@ void freeBINOMIAL(BINOMIAL *b) {
 BHNODE *bubbleUp(BINOMIAL *b, BHNODE *n) {
     assert(b != 0);
     assert(n != 0);
-    // TODO: Am I correct?
-    // TODO: Refactor?
     BHNODE *p = getBHNODEparent(n);
     if (n == p) return n;
     if (compareBHNODE(n, getBHNODEparent(n)) >= 0) {

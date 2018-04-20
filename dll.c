@@ -238,11 +238,27 @@ void removeDLLall(DLL *items) {
  * Usage:
  * Description:
  */
-void *removeDLLnode(DLL *items, void *node) {
+void *removeDLLnode(DLL *items, void *v) {
     assert(items != 0);
-    assert(node != 0);
+    assert(v != 0);
+    DLLNODE *node = v;
     void *rv = getDLLNODEvalue(node);
-    ((DLLNODE *)node)->prev->next = ((DLLNODE *)node)->next;
+    if (node == items->head) {
+        // removal at head of list
+        setDLLNODEprev(node->next, NULL);
+        items->head = node->next;
+    }
+    else if (node == items->tail) {
+        // removal at tail of list
+        setDLLNODEnext(node->prev, NULL);
+        items->tail = node->prev;
+    }
+    else {
+        // removal between head and tail
+        setDLLNODEnext(node->prev, node->next);
+        setDLLNODEprev(node->next, node->prev);
+    }
+    items->size--;
     return rv;
 }
 

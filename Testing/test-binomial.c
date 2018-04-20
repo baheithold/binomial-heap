@@ -9,6 +9,10 @@ int main(void) {
     for (int i = 0; i <= 12; i++) {
         insertBINOMIAL(b, newINTEGER(i));
     }
+    printf("BEFORE:\n");
+    displayBINOMIALdebug(b, stdout);
+    extractBINOMIAL(b);
+    printf("AFTER:\n");
     displayBINOMIALdebug(b, stdout);
 
     freeBINOMIAL(b);
