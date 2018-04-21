@@ -9,11 +9,13 @@ int main(void) {
     for (int i = 0; i <= 12; i++) {
         insertBINOMIAL(b, newINTEGER(i));
     }
-    printf("BEFORE:\n");
     displayBINOMIALdebug(b, stdout);
-    extractBINOMIAL(b);
-    printf("AFTER:\n");
-    displayBINOMIALdebug(b, stdout);
+    for (int j = 0; j <= 12; j++) {
+        printf("REMOVING: ");
+        displayINTEGER(extractBINOMIAL(b), stdout);
+        printf("\n");
+        displayBINOMIALdebug(b, stdout);
+    }
 
     freeBINOMIAL(b);
     return 0;

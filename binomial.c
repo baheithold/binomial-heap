@@ -214,8 +214,7 @@ void *peekBINOMIAL(BINOMIAL *b) {
 void *extractBINOMIAL(BINOMIAL *b) {
     // TODO: Am I correct?
     assert(b != 0);
-    BHNODE *y = b->extreme;
-    y = removeDLLnode(b->rootlist, getBHNODEowner(y));
+    BHNODE *y = removeDLLnode(b->rootlist, getBHNODEowner(b->extreme));
     void *rv = getBHNODEvalue(y);
     DLL *yChildren = getBHNODEchildren(y);
     firstDLL(yChildren);
@@ -320,13 +319,13 @@ BHNODE *combine(BINOMIAL *b, BHNODE *x, BHNODE *y) {
     assert(y != 0);
     if (compareBHNODE(x, y) < 0) {
         DLL *xChildren = getBHNODEchildren(x);
-        insertDLL(xChildren, sizeDLL(xChildren), y);
+        setBHNODEowner(y, insertDLL(xChildren, sizeDLL(xChildren), y));
         setBHNODEparent(y, x);
         return x;
     }
     else {
         DLL *yChildren = getBHNODEchildren(y);
-        insertDLL(yChildren, sizeDLL(yChildren), x);
+        setBHNODEowner(x, insertDLL(yChildren, sizeDLL(yChildren), x));
         setBHNODEparent(x, y);
         return y;
     }
@@ -346,7 +345,7 @@ void consolidate(BINOMIAL *b) {
     b->extreme = NULL;
     for (int i = 0; i < size; ++i) {
         if (D[i] != NULL) {
-            insertDLL(b->rootlist, sizeDLL(b->rootlist), D[i]);
+            setBHNODEowner(D[i], insertDLL(b->rootlist, sizeDLL(b->rootlist), D[i]));
             if (b->extreme == NULL || compareBHNODE(D[i], b->extreme) < 0) {
                 b->extreme = D[i];
             }

@@ -243,7 +243,12 @@ void *removeDLLnode(DLL *items, void *v) {
     assert(v != 0);
     DLLNODE *node = v;
     void *rv = getDLLNODEvalue(node);
-    if (node == items->head) {
+    if (items->size == 1) {
+        // removing only value from list
+        items->head = NULL;
+        items->tail = NULL;
+    }
+    else if (node == items->head) {
         // removal at head of list
         setDLLNODEprev(node->next, NULL);
         items->head = node->next;
