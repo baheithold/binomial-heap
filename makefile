@@ -62,9 +62,12 @@ test: 	all
 #                                            							Valgrind
 
 valgrind: 	all
-	for x in $(TESTS); do \
+	@for x in $(TESTS); do \
 		echo valgrind $$x; \
+		echo -------------------------; \
 		valgrind ./$$x; echo; \
+		echo -------------------------; \
+		echo; \
 		done
 
 ################################################################################

@@ -263,8 +263,8 @@ void *removeDLLnode(DLL *items, void *v) {
         setDLLNODEnext(node->prev, node->next);
         setDLLNODEprev(node->next, node->prev);
     }
-    free((DLLNODE *) node);
     items->size--;
+    free((DLLNODE *) node);
     return rv;
 }
 

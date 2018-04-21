@@ -166,7 +166,7 @@ void *insertBINOMIAL(BINOMIAL *b, void *v) {
     assert(b != 0);
     BHNODE *n = newBHNODE(v, b->display, b->compare, b->free);
     setBHNODEparent(n, n);
-    setBHNODEowner(n, insertDLL(b->rootlist, sizeDLL(b->rootlist), n));
+    setBHNODEowner(n, insertDLL(b->rootlist, 0, n));
     b->size++;
     b->consolidate(b);
     return n;
@@ -222,6 +222,7 @@ void *extractBINOMIAL(BINOMIAL *b) {
         setBHNODEparent(currentDLL(yChildren), currentDLL(yChildren));
         nextDLL(yChildren);
     }
+    unionDLL(yChildren, b->rootlist);
     unionDLL(b->rootlist, yChildren);
     b->consolidate(b);
     b->size--;
