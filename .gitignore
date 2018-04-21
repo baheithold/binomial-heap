@@ -36,6 +36,17 @@
 *.x86_64
 *.hex
 test-binomial
+binomial-0-0
+binomial-0-1
+binomial-0-2
+binomial-0-3
+binomial-0-4
+binomial-0-5
+binomial-0-6
+binomial-0-7
+binomial-0-8
+binomial-0-9
+binomial-0-10
 
 # Debug files
 *.dSYM/

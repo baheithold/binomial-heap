@@ -225,6 +225,8 @@ void *extractBINOMIAL(BINOMIAL *b) {
     unionDLL(b->rootlist, yChildren);
     b->consolidate(b);
     b->size--;
+    y->free = NULL;
+    freeBHNODE(y);
     return rv;
 }
 
@@ -258,6 +260,7 @@ void displayBINOMIAL(BINOMIAL *b, FILE *fp) {
         if (moreDLL(b->rootlist)) fprintf(fp, " ");
         degree++;
     }
+    fprintf(fp, "\n");
 }
 
 void displayBINOMIALdebug(BINOMIAL *b, FILE *fp) {

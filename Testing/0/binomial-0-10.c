@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "integer.h"
-#include "real.h"
-#include "string.h"
-#include "binomial.h"
+#include "../../integer.h"
+#include "../../real.h"
+#include "../../string.h"
+#include "../../binomial.h"
 
 extern void srandom(unsigned int);
 extern long int random(void);
