@@ -212,8 +212,8 @@ void *peekBINOMIAL(BINOMIAL *b) {
 }
 
 void *extractBINOMIAL(BINOMIAL *b) {
-    // TODO: Am I correct?
     assert(b != 0);
+    assert(b->size > 0);
     BHNODE *y = removeDLLnode(b->rootlist, getBHNODEowner(b->extreme));
     void *rv = getBHNODEvalue(y);
     DLL *yChildren = getBHNODEchildren(y);

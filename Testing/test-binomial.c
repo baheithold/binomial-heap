@@ -10,7 +10,7 @@ int main(void) {
         insertBINOMIAL(b, newINTEGER(i));
     }
     displayBINOMIALdebug(b, stdout);
-    for (int j = 0; j <= 12; j++) {
+    for (int j = 0; j <= 13; j++) {
         printf("REMOVING: ");
         displayINTEGER(extractBINOMIAL(b), stdout);
         printf("\n");
