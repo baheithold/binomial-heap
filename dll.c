@@ -305,7 +305,12 @@ int moreDLL(DLL *items) {
  */
 void nextDLL(DLL *items) {
     assert(items != 0);
-    items->iterator = items->iterator->next;
+    if (items->iterator == items->tail) {
+        items->iterator = NULL;
+    }
+    else {
+        items->iterator = items->iterator->next;
+    }
 }
 
 /*
@@ -315,7 +320,12 @@ void nextDLL(DLL *items) {
  */
 void prevDLL(DLL *items) {
     assert(items != 0);
-    items->iterator = items->iterator->prev;
+    if (items->iterator == items->head) {
+        items->iterator = NULL;
+    }
+    else {
+        items->iterator = items->iterator->prev;
+    }
 }
 
 /*
@@ -393,7 +403,7 @@ void *getDLL(DLL *items, int index) {
  *  constant distance from the front and from the back.
  */
 void *setDLL(DLL *items, int index, void *value) {
-    // TODO: Am I right? Can I do better?
+    // TODO: Can I do better?
     assert(items != 0);
     assert(index >= 0 && index <= items->size);
     void *oldValue = NULL;
@@ -646,7 +656,6 @@ void *removeFromIndex(DLL *items, int index) {
  *  Description: This method returns the DLLNODE at the given index.
  */
 DLLNODE *getNodeAtIndex(DLL *items, int index) {
-    // FIXME
     DLLNODE *curr;
     if (items->size - index <= index) {
         // traverse from the tail of the list
