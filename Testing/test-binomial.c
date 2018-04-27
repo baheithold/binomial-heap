@@ -4,7 +4,7 @@
 #include "../binomial.h"
 
 int main(void) {
-    BINOMIAL *b = newBINOMIAL(displayINTEGER, compareINTEGER, 0, freeINTEGER);
+    BINOMIAL *b = newBINOMIAL(displayINTEGER, compareINTEGER, updateINTEGER, freeINTEGER);
 
     for (int i = 0; i <= 12; i++) {
         insertBINOMIAL(b, newINTEGER(i));

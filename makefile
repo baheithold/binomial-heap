@@ -8,7 +8,7 @@ TESTS 	= binomial-0-0 binomial-0-1 binomial-0-2 binomial-0-3 binomial-0-4 \
 		  binomial-0-5 binomial-0-6 binomial-0-7 binomial-0-8 binomial-0-9 \
 		  binomial-0-10
 
-all: 	$(OBJS) $(TESTS)
+all: 	$(OBJS) $(TESTS) test-binomial
 
 ################################################################################
 #                                                 Classes for Primitive Types
@@ -45,8 +45,11 @@ queue.o: 	queue.c queue.h sll.h
 ################################################################################
 #                                                                         BINOMIAL
 
-binomial.o: 	binomial.c binomial.h sll.h
+binomial.o: 	binomial.c binomial.h dll.h
 	gcc $(OOPTS) binomial.c
+
+test-binomial.o: 	./Testing/test-binomial.c binomial.c binomial.h dll.h
+	gcc $(OOPTS) ./Testing/test-binomial.c
 
 ################################################################################
 #                                                Test everything except trees
@@ -77,7 +80,7 @@ clean:
 	rm -f *.o vgcore.* $(TESTS)
 
 ################################################################################
-#                                                                AVL tests
+#                                                                		tests
 
 binomial: 	$(TESTS) $(OBJS)
 	for x in $(TESTS); do \
@@ -86,3 +89,6 @@ binomial: 	$(TESTS) $(OBJS)
 
 $(TESTS): 	%: ./Testing/0/%.c binomial.o
 	gcc $(LOPTS) $(OBJS) $< -o $@
+
+test-binomial: 	integer.o dll.o sll.o queue.o binomial.o test-binomial.o
+	gcc $(LOPTS) integer.o dll.o sll.o queue.o binomial.o test-binomial.o -o test-binomial
